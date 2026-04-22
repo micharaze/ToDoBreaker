@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode – benutzerspezifische Einstellungen (pro Entwickler unterschiedlich)
+xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build-Artefakte
+build/
+DerivedData/
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/xcode/
+
+# Xcode-Projekt (wird von xcodegen aus project.yml generiert)
+ToDoBreaker.xcodeproj/
+
+# Credentials & Secrets
+.env
+*.env
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+
+# Editor
+.swp
+*~
+.idea/

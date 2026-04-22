@@ -1,0 +1,43 @@
+name: ToDoBreaker
+options:
+  bundleIdPrefix: de.radzieda
+  deploymentTarget:
+    macOS: "14.0"
+  generateEmptyDirectories: true
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  SQLite:
+    url: https://github.com/stephencelis/SQLite.swift
+    from: "0.15.3"
+
+targets:
+  ToDoBreaker:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: ToDoBreaker
+        excludes:
+          - "**/*.md"
+    resources:
+      - path: ToDoBreaker/Resources
+    entitlements:
+      path: ToDoBreaker/ToDoBreaker.entitlements
+    dependencies:
+      - package: SQLite
+        product: SQLite
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.radzieda.ToDoBreaker
+        INFOPLIST_FILE: ToDoBreaker/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ToDoBreaker/ToDoBreaker.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
