@@ -1,12 +1,12 @@
 # ToDoBreaker
 
-A minimal macOS menu bar app for ephemeral daily task planning. Every morning, a full-screen overlay blocks your displays until you've planned your day. Todos expire at midnight and never carry over.
+A minimal macOS menu bar app for ephemeral daily task planning. Every morning, a full-screen overlay blocks your displays until you've planned your day. Todos are tied to the current day and are cleared when you confirm the next morning break.
 
 ## Features
 
 - **Morning Break overlay** — blocks all screens at a configured time until you enter your tasks for the day
-- **Daily todos** — tasks are tied to the current day and disappear the next morning
-- **Menu bar** — quick access to your task list and progress without opening a window
+- **Daily todos** — tasks are tied to the current day and cleared when the next morning break is confirmed
+- **Menu bar** — shows today's progress (completed / total) and quick actions without opening the main window
 - **Snooze** — postpone the morning break by a configurable number of minutes
 - **Active days** — configure which weekdays the morning break is active
 
@@ -33,7 +33,9 @@ Then press **Cmd+R** to build and run.
 
 ## Distribution
 
-The app is not sandboxed (required for screen-level overlay windows), so Mac App Store distribution is not possible. Distribute via notarized DMG or share the `.app` bundle directly — recipients may need to right-click → Open on first launch.
+Mac App Store distribution is not practical: Apple's review guidelines prohibit apps that block all displays and hide system UI (Dock, menu bar) — regardless of sandboxing. All APIs used are technically sandbox-compatible.
+
+Distribute via notarized DMG or share the `.app` bundle directly. Recipients may need to right-click → Open on first launch if the app is not notarized.
 
 ## Tech Stack
 
