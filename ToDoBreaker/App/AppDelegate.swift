@@ -5,7 +5,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let environment = AppEnvironment()
 
     private var wakeObserver: Any?
+    private var windowDidBecomeKeyObserver: Any?
+    private var windowWillCloseObserver: Any?
     private var isLaunching = true
+
+    private func isMainWindow(_ window: NSWindow) -> Bool {
+        if let id = window.identifier?.rawValue, id == "main" {
+            return true
+        }
+        return window.title == "ToDoBreaker"
+    }
+
+    private func updateActivationPolicyForVisibleWindows(excluding windowToExclude: NSWindow? = nil) {
+        let hasVisibleMainWindow = NSApp.windows.contains {
+            isMainWindow($0) && $0.isVisible && $0 !== windowToExclude
+        }
+        NSApp.setActivationPolicy(hasVisibleMainWindow ? .regular : .accessory)
+    }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -26,7 +42,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // Show Dock icon when user opens a window — ignore auto-restored windows on launch.
-        NotificationCenter.default.addObserver(
+        windowDidBecomeKeyObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.didBecomeKeyNotification,
             object: nil,
             queue: .main
@@ -34,13 +50,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let window = notification.object as? NSWindow,
                   !(window is OverlayWindow) else { return }
             Task { @MainActor [weak self] in
-                guard let self, !self.isLaunching else { return }
+                guard let self, !self.isLaunching, self.isMainWindow(window) else { return }
                 NSApp.setActivationPolicy(.regular)
             }
         }
 
         // Hide Dock icon when all regular windows are closed.
-        NotificationCenter.default.addObserver(
+        windowWillCloseObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.willCloseNotification,
             object: nil,
             queue: .main
@@ -48,11 +64,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let closing = notification.object as? NSWindow,
                   !(closing is OverlayWindow) else { return }
             Task { @MainActor in
-                let hasVisible = NSApp.windows.contains {
-                    !($0 is OverlayWindow) && $0.isVisible && $0 !== closing
-                }
-                if !hasVisible {
-                    NSApp.setActivationPolicy(.accessory)
+                // Run on the next runloop so AppKit has already updated visibility.
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    if self.isMainWindow(closing) {
+                        NSApp.setActivationPolicy(.accessory)
+                    } else {
+                        self.updateActivationPolicyForVisibleWindows(excluding: closing)
+                    }
                 }
             }
         }
@@ -81,6 +100,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     deinit {
         if let obs = wakeObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(obs)
+        }
+        if let obs = windowDidBecomeKeyObserver {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        if let obs = windowWillCloseObserver {
+            NotificationCenter.default.removeObserver(obs)
         }
     }
 }
