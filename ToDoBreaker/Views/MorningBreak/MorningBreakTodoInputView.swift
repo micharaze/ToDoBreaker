@@ -1,28 +1,34 @@
 import SwiftUI
 
-/// Dynamic list of text fields for entering today's todos during the morning break.
 struct MorningBreakTodoInputView: View {
     @Binding var titles: [String]
-    @FocusState private var focusedIndex: Int?
+    @FocusState private var focusedID: UUID?
+
+    private struct Entry: Identifiable {
+        let id = UUID()
+        var title: String
+    }
+
+    @State private var entries: [Entry] = []
 
     var body: some View {
         VStack(spacing: 6) {
-            ForEach(Array(titles.enumerated()), id: \.offset) { index, _ in
+            ForEach(entries) { entry in
                 HStack(spacing: 10) {
                     Image(systemName: "circle")
                         .foregroundStyle(.secondary)
                         .font(.body)
                         .frame(width: 18)
 
-                    TextField("Aufgabe eingeben...", text: $titles[index])
+                    TextField("Aufgabe eingeben...", text: safeBinding(for: entry.id))
                         .textFieldStyle(.plain)
                         .font(.body)
-                        .focused($focusedIndex, equals: index)
+                        .focused($focusedID, equals: entry.id)
                         .onSubmit { appendField() }
 
-                    if titles.count > 1 {
+                    if entries.count > 1 {
                         Button {
-                            removeField(at: index)
+                            removeField(id: entry.id)
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.caption)
@@ -46,19 +52,35 @@ struct MorningBreakTodoInputView: View {
             .buttonStyle(.plain)
             .padding(.top, 2)
         }
-        .onAppear { focusedIndex = 0 }
+        .onAppear {
+            entries = titles.map { Entry(title: $0) }
+            focusedID = entries.first?.id
+        }
+        .onChange(of: entries.map(\.title)) { _, newTitles in
+            titles = newTitles
+        }
+    }
+
+    private func safeBinding(for id: UUID) -> Binding<String> {
+        Binding(
+            get: { entries.first(where: { $0.id == id })?.title ?? "" },
+            set: { newValue in
+                guard let index = entries.firstIndex(where: { $0.id == id }) else { return }
+                entries[index].title = newValue
+            }
+        )
     }
 
     private func appendField() {
-        titles.append("")
-        let newIndex = titles.count - 1
-        // Give SwiftUI a tick to render the new field before focusing it.
-        DispatchQueue.main.async { focusedIndex = newIndex }
+        let entry = Entry(title: "")
+        entries.append(entry)
+        DispatchQueue.main.async { focusedID = entry.id }
     }
 
-    private func removeField(at index: Int) {
-        guard titles.count > 1 else { return }
-        titles.remove(at: index)
-        focusedIndex = max(0, index - 1)
+    private func removeField(id: UUID) {
+        guard entries.count > 1 else { return }
+        guard let index = entries.firstIndex(where: { $0.id == id }) else { return }
+        entries.remove(at: index)
+        focusedID = entries[max(0, index - 1)].id
     }
 }
