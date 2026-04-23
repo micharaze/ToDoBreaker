@@ -20,7 +20,7 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            Button("App öffnen") {
+            Button("ToDos anzeigen") {
                 NSApp.setActivationPolicy(.regular)
                 openWindow(id: "main")
                 NSApp.activate(ignoringOtherApps: true)
