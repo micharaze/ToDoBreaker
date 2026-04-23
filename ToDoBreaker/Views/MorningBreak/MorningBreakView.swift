@@ -1,7 +1,5 @@
 import SwiftUI
 
-/// Modal card shown in the center of the main display during the morning break.
-/// Displayed on top of `BlurOverlayView` inside the overlay window.
 struct MorningBreakView: View {
     @EnvironmentObject private var env: AppEnvironment
     @State private var todoTitles: [String] = [""]
@@ -15,28 +13,25 @@ struct MorningBreakView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            // Header
             VStack(spacing: 6) {
-                Text("Guten Morgen! 👋")
+                Text("morning_greeting")
                     .font(.title2.bold())
-                Text("Was steht heute an?")
+                Text("morning_question")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             Divider()
 
-            // Todo input
             MorningBreakTodoInputView(titles: $todoTitles)
 
             Divider()
 
-            // Actions
             VStack(spacing: 10) {
                 Button {
                     coordinator.confirm(titles: todoTitles)
                 } label: {
-                    Text("Los geht's!")
+                    Text("morning_confirm")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
@@ -49,7 +44,7 @@ struct MorningBreakView: View {
                     coordinator.snooze()
                     todoTitles = [""]
                 } label: {
-                    Text("Snooze · \(snoozeMinutes) min")
+                    Text(verbatim: "Snooze · \(snoozeMinutes) min")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

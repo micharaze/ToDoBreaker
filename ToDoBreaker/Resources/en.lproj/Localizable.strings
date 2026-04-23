@@ -1,0 +1,46 @@
+/* Morning Break */
+"morning_greeting" = "Good morning! 👋";
+"morning_question" = "What's on today?";
+"morning_confirm" = "Let's go!";
+
+/* Todo Input */
+"todo_placeholder" = "Enter task...";
+"add_task" = "Add task";
+
+/* Main Window */
+"no_todos_title" = "No tasks for today";
+"no_todos_subtitle" = "Add a task below.";
+"progress_format" = "%d of %d done";
+
+/* Add Todo */
+"new_todo_placeholder" = "New task...";
+
+/* Todo Actions */
+"action_delete" = "Delete";
+"action_edit" = "Edit";
+
+/* Menu Bar */
+"menu_open_app" = "Open App";
+"menu_start_break" = "Start Morning Break";
+"menu_settings" = "Settings";
+"menu_quit" = "Quit";
+"menubar_progress" = "%d / %d done";
+
+/* Settings */
+"settings_start_time" = "Start time";
+"settings_active_days" = "Active days";
+"settings_snooze_value" = "%d minutes";
+"settings_launch_login" = "Launch at login";
+"settings_start_now" = "Start Morning Break now";
+"settings_section_language" = "Language";
+"language_english" = "English";
+"language_german" = "German";
+
+/* Weekdays */
+"weekday_mo" = "Mo";
+"weekday_tu" = "Tu";
+"weekday_we" = "We";
+"weekday_th" = "Th";
+"weekday_fr" = "Fr";
+"weekday_sa" = "Sa";
+"weekday_su" = "Su";

@@ -6,8 +6,8 @@ struct MainWindowView: View {
 
     private var dateHeader: String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "EEEE, d. MMMM"
+        f.locale = env.appLocale
+        f.setLocalizedDateFormatFromTemplate("EEEEMMMMd")
         return f.string(from: Date())
     }
 
@@ -15,13 +15,12 @@ struct MainWindowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(dateHeader)
+                    Text(verbatim: dateHeader)
                         .font(.headline)
                     if !env.todos.isEmpty {
-                        Text("\(completedCount) von \(env.todos.count) erledigt")
+                        Text(verbatim: String(format: env.ls("progress_format"), completedCount, env.todos.count))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -49,16 +48,15 @@ struct MainWindowView: View {
 
             Divider()
 
-            // Todo list or empty state
             if env.todos.isEmpty {
                 VStack(spacing: 10) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 38))
                         .foregroundStyle(.tertiary)
-                    Text("Keine Aufgaben für heute")
+                    Text("no_todos_title")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Text("Füge unten eine Aufgabe hinzu.")
+                    Text("no_todos_subtitle")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
@@ -74,11 +72,11 @@ struct MainWindowView: View {
 
             Divider()
 
-            // Add todo
             AddTodoView()
                 .padding(12)
         }
         .frame(minWidth: 340, idealWidth: 380, minHeight: 400, idealHeight: 520)
+        .environment(\.locale, env.appLocale)
         .onAppear { env.loadTodaysTodos() }
     }
 }

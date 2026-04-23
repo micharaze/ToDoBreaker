@@ -10,7 +10,7 @@ struct MenuBarContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             if totalCount > 0 {
-                Text("\(completedCount) / \(totalCount) erledigt")
+                Text(verbatim: String(format: env.ls("menubar_progress"), completedCount, totalCount))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 12)
@@ -20,13 +20,18 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            Button("ToDos anzeigen") {
+            Button(env.ls("menu_open_app")) {
                 NSApp.setActivationPolicy(.regular)
                 openWindow(id: "main")
                 NSApp.activate(ignoringOtherApps: true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    NSApp.windows
+                        .first { $0.identifier?.rawValue == "main" }?
+                        .makeKeyAndOrderFront(nil)
+                }
             }
 
-            Button("Morning Break starten") {
+            Button(env.ls("menu_start_break")) {
                 env.coordinator.triggerManually()
             }
             .disabled(env.coordinator.isOverlayVisible)
@@ -34,15 +39,16 @@ struct MenuBarContentView: View {
             Divider()
 
             SettingsLink {
-                Text("Einstellungen")
+                Text(verbatim: env.ls("menu_settings"))
             }
 
             Divider()
 
-            Button("Beenden") {
+            Button(env.ls("menu_quit")) {
                 NSApp.terminate(nil)
             }
         }
+        .environment(\.locale, env.appLocale)
         .onAppear { env.loadTodaysTodos() }
     }
 }

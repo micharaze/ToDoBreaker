@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// Persistent input field at the bottom of the main window for adding todos.
 struct AddTodoView: View {
     @EnvironmentObject private var env: AppEnvironment
     @FocusState private var isFocused: Bool
@@ -20,7 +19,7 @@ struct AddTodoView: View {
             }
             .buttonStyle(.plain)
 
-            TextField("Neue Aufgabe...", text: $env.newTodoTitle)
+            TextField("new_todo_placeholder", text: $env.newTodoTitle)
                 .textFieldStyle(.plain)
                 .focused($isFocused)
                 .frame(maxWidth: .infinity)

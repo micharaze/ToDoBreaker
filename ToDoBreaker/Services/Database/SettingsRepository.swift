@@ -51,6 +51,7 @@ final class SettingsRepository {
             s.activeWeekdays = Set(days.split(separator: ",").compactMap { Int($0) })
         }
         if let v = get("launch_at_login") { s.launchAtLogin = v == "true" }
+        if let lang = get("language").flatMap(AppLanguage.init(rawValue:)) { s.language = lang }
         return s
     }
 
@@ -60,6 +61,7 @@ final class SettingsRepository {
         set("snooze_minutes",  value: "\(settings.snoozeMinutes)")
         set("active_weekdays", value: settings.activeWeekdays.sorted().map(String.init).joined(separator: ","))
         set("launch_at_login", value: settings.launchAtLogin ? "true" : "false")
+        set("language",        value: settings.language.rawValue)
     }
 
     // MARK: - Break state

@@ -54,13 +54,13 @@ struct TodoRowView: View {
             Button(role: .destructive) {
                 env.deleteTodo(todo)
             } label: {
-                Label("Löschen", systemImage: "trash")
+                Label("action_delete", systemImage: "trash")
             }
         }
         .contextMenu {
-            Button("Bearbeiten") { startEditing() }
+            Button("action_edit") { startEditing() }
             Divider()
-            Button("Löschen", role: .destructive) { env.deleteTodo(todo) }
+            Button("action_delete", role: .destructive) { env.deleteTodo(todo) }
         }
     }
 

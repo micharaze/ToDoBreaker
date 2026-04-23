@@ -4,15 +4,15 @@ struct SettingsView: View {
     @EnvironmentObject private var env: AppEnvironment
     @State private var settings: AppSettings = .defaults
 
-    // Weekdays in display order (Mon first)
-    private let weekdays: [(Int, String)] = [
-        (2, "Mo"), (3, "Di"), (4, "Mi"), (5, "Do"), (6, "Fr"), (7, "Sa"), (1, "So")
+    private let weekdays: [(Int, LocalizedStringKey)] = [
+        (2, "weekday_mo"), (3, "weekday_tu"), (4, "weekday_we"),
+        (5, "weekday_th"), (6, "weekday_fr"), (7, "weekday_sa"), (1, "weekday_su")
     ]
 
     var body: some View {
         Form {
             Section("Morning Break") {
-                LabeledContent("Startuhrzeit") {
+                LabeledContent("settings_start_time") {
                     HStack(spacing: 4) {
                         Picker("", selection: $settings.startHour) {
                             ForEach(0..<24, id: \.self) { h in
@@ -35,11 +35,11 @@ struct SettingsView: View {
                     }
                 }
 
-                LabeledContent("Aktive Tage") {
+                LabeledContent("settings_active_days") {
                     HStack(spacing: 6) {
-                        ForEach(weekdays, id: \.0) { weekday, name in
+                        ForEach(weekdays, id: \.0) { weekday, key in
                             WeekdayButton(
-                                label: name,
+                                label: key,
                                 isActive: settings.activeWeekdays.contains(weekday)
                             ) {
                                 if settings.activeWeekdays.contains(weekday) {
@@ -54,28 +54,38 @@ struct SettingsView: View {
             }
 
             Section("Snooze") {
-                Stepper(
-                    "\(settings.snoozeMinutes) Minuten",
-                    value: $settings.snoozeMinutes,
-                    in: 1...60
-                )
+                Stepper(value: $settings.snoozeMinutes, in: 1...60) {
+                    Text(verbatim: String(format: env.ls("settings_snooze_value"), settings.snoozeMinutes))
+                }
             }
 
             Section("System") {
-                Toggle("Beim Anmelden starten", isOn: $settings.launchAtLogin)
+                Toggle("settings_launch_login", isOn: $settings.launchAtLogin)
                     .onChange(of: settings.launchAtLogin) { _, newValue in
                         env.loginItemService.setEnabled(newValue)
                     }
 
-                Button("Morning Break jetzt starten") {
+                Button("settings_start_now") {
                     env.coordinator.triggerManually()
                 }
                 .disabled(env.coordinator.isOverlayVisible)
+            }
+
+            Section("settings_section_language") {
+                Picker("_", selection: $settings.language) {
+                    ForEach(AppLanguage.allCases) { lang in
+                        Text(languageLabel(lang)).tag(lang)
+                    }
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .fixedSize()
             }
         }
         .formStyle(.grouped)
         .scrollIndicators(.hidden)
         .frame(width: 420)
+        .environment(\.locale, env.appLocale)
         .onAppear {
             settings = env.settings
             settings.launchAtLogin = env.loginItemService.isEnabled
@@ -84,10 +94,17 @@ struct SettingsView: View {
             env.saveSettings(newSettings)
         }
     }
+
+    private func languageLabel(_ lang: AppLanguage) -> LocalizedStringKey {
+        switch lang {
+        case .english: return "language_english"
+        case .german:  return "language_german"
+        }
+    }
 }
 
 private struct WeekdayButton: View {
-    let label: String
+    let label: LocalizedStringKey
     let isActive: Bool
     let action: () -> Void
 

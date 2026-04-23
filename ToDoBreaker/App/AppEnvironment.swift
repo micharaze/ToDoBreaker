@@ -18,6 +18,17 @@ final class AppEnvironment: ObservableObject {
     @Published var newTodoTitle: String = ""
     @Published var settings: AppSettings
 
+    var appLocale: Locale { settings.language.locale }
+
+    /// Looks up a key in the correct Localizable.strings for the current app language.
+    func ls(_ key: String) -> String {
+        let lang = appLocale.language.languageCode?.identifier ?? "en"
+        let path = Bundle.main.path(forResource: lang, ofType: "lproj")
+                ?? Bundle.main.path(forResource: "en", ofType: "lproj")
+        guard let path, let bundle = Bundle(path: path) else { return key }
+        return bundle.localizedString(forKey: key, value: key, table: nil)
+    }
+
     private var cancellables = Set<AnyCancellable>()
 
     init() {
@@ -52,7 +63,11 @@ final class AppEnvironment: ObservableObject {
             .sink { [weak self] visible in
                 guard let self else { return }
                 if visible {
-                    let view = AnyView(MorningBreakView().environmentObject(self))
+                    let view = AnyView(
+                        MorningBreakView()
+                            .environmentObject(self)
+                            .environment(\.locale, self.appLocale)
+                    )
                     overlayService.showOverlay(morningBreakView: view)
                 } else {
                     overlayService.hideOverlay()

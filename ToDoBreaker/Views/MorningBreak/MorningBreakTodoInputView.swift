@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MorningBreakTodoInputView: View {
     @Binding var titles: [String]
+    @EnvironmentObject private var env: AppEnvironment
     @FocusState private var focusedID: UUID?
 
     private struct Entry: Identifiable {
@@ -20,7 +21,7 @@ struct MorningBreakTodoInputView: View {
                         .font(.body)
                         .frame(width: 18)
 
-                    TextField("Aufgabe eingeben...", text: safeBinding(for: entry.id))
+                    TextField("todo_placeholder", text: safeBinding(for: entry.id))
                         .textFieldStyle(.plain)
                         .font(.body)
                         .focused($focusedID, equals: entry.id)
@@ -45,7 +46,7 @@ struct MorningBreakTodoInputView: View {
             Button {
                 appendField()
             } label: {
-                Label("Weitere Aufgabe", systemImage: "plus")
+                Label("add_task", systemImage: "plus")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
