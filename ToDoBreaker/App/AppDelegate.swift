@@ -14,9 +14,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return window.title == "ToDoBreaker"
     }
 
+    private func isUserFacingWindow(_ window: NSWindow) -> Bool {
+        !(window is OverlayWindow) &&
+        window.styleMask.contains(.titled) &&
+        !window.isMiniaturized
+    }
+
     private func updateActivationPolicyForVisibleWindows(excluding windowToExclude: NSWindow? = nil) {
         let hasVisible = NSApp.windows.contains {
-            !($0 is OverlayWindow) && $0.isVisible && $0 !== windowToExclude
+            isUserFacingWindow($0) && $0.isVisible && $0 !== windowToExclude
         }
         NSApp.setActivationPolicy(hasVisible ? .regular : .accessory)
     }
@@ -45,11 +51,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let window = notification.object as? NSWindow,
-                  !(window is OverlayWindow),
-                  window.styleMask.contains(.titled) else { return }
             Task { @MainActor [weak self] in
-                guard let self, !self.isLaunching else { return }
+                guard let self,
+                      let window = notification.object as? NSWindow,
+                      self.isUserFacingWindow(window),
+                      !self.isLaunching else { return }
                 NSApp.setActivationPolicy(.regular)
             }
         }
@@ -62,11 +68,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             forName: NSWindow.willCloseNotification,
             object: nil,
             queue: .main
-        ) { notification in
-            guard let closing = notification.object as? NSWindow,
-                  !(closing is OverlayWindow),
-                  closing.styleMask.contains(.titled) else { return }
+        ) { [weak self] notification in
             Task { @MainActor in
+                guard let self,
+                      let closing = notification.object as? NSWindow,
+                      self.isUserFacingWindow(closing) else { return }
                 DispatchQueue.main.async { [weak self] in
                     self?.updateActivationPolicyForVisibleWindows(excluding: closing)
                 }

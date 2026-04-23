@@ -41,6 +41,9 @@ struct MenuBarContentView: View {
             SettingsLink {
                 Text(verbatim: env.ls("menu_settings"))
             }
+            .simultaneousGesture(TapGesture().onEnded {
+                focusSettingsWindow()
+            })
 
             Divider()
 
@@ -50,5 +53,18 @@ struct MenuBarContentView: View {
         }
         .environment(\.locale, env.appLocale)
         .onAppear { env.loadTodaysTodos() }
+    }
+
+    private func focusSettingsWindow() {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            let settingsWindow = NSApp.windows
+                .filter { $0.styleMask.contains(.titled) && !$0.isMiniaturized }
+                .first { $0.identifier?.rawValue != "main" }
+            settingsWindow?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 }
